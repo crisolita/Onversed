@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int             @id @default(autoincrement())
+  email         String          @unique
+  password      String
+  firstname     String
+  lastname      String
+  userol        UserRol
+  authToken     String?
+  userProfile   userProfile[]
+  designRequest designRequest[]
+}
+
+model userProfile {
+  id             Int     @id @default(autoincrement())
+  user_id        Int     @unique
+  foto_de_perfil String
+  domicilio      String
+  postal_code    String
+  country        String
+  cif            String?
+  nombre_empresa String?
+  user           User    @relation(fields: [user_id], references: [id])
+}
+
+model collections {
+  id            Int             @id @default(autoincrement())
+  name          String
+  description   String?
+  designRequest designRequest[]
+}
+
+model designRequest {
+  id            Int         @id @default(autoincrement())
+  request_user  Int
+  collection_id Int
+  name  String
+  SKU   String @unique
+  format FormatDesign
+  otro String?
+  redes RRSS?
+  metaverso Metaverso?
+  model_nft String?
+  status  STATUSREQUEST
+  collection    collections @relation(fields: [collection_id], references: [id])
+  user          User        @relation(fields: [request_user], references: [id])
+}
+
+enum UserRol {
+  ADMIN
+  CLIENT
+}
+enum FormatDesign {
+FACTORY_3D
+MARKETING_3DAVATAR
+MARKETING_3D
+RENDER_360
+RENDER_RUNWAY
+OTRO
+}
+enum RRSS {
+INSTAGRAM
+TIKTOK
+SNAP
+}
+enum Metaverso {
+  Roblox
+  ZEPETO
+}
+enum STATUSREQUEST {
+BORRADOR
+PAGO_PENDIENTE
+ENVIADO
+EN_PROCESO
+ENTREGADO
+REVISION
+FINALIZADO
+}
