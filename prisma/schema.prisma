@@ -52,6 +52,8 @@ model designRequest {
   redes RRSS?
   metaverso Metaverso?
   model_nft String?
+  mediaPath String?
+  delivery_date DateTime?
   status  STATUSREQUEST
   collection    collections @relation(fields: [collection_id], references: [id])
   user          User        @relation(fields: [request_user], references: [id])
@@ -75,7 +77,7 @@ TIKTOK
 SNAP
 }
 enum Metaverso {
-  Roblox
+  ROBLOX
   ZEPETO
 }
 enum STATUSREQUEST {

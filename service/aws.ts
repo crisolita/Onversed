@@ -31,7 +31,7 @@ export const uploadImage = async (key: ArrayBuffer, ruta: string) => {
 // Obtener una imagen
 export const getImage = async (key: string) => {
   const getObjectParams = {
-    Bucket: "xperiend-images",
+    Bucket: "onversedspace",
     Key: `${key}.jpg`,
   };
   const imageUrl = s3.getSignedUrl("getObject", getObjectParams);
@@ -52,29 +52,29 @@ export const deleteImageAWS = async (key: string) => {
   }
 };
 
-export const uploadDoc = async (key: ArrayBuffer, ruta: string) => {
+export const getMedia = async (key: string) => {
+  const getObjectParams = {
+    Bucket: "onversedspace",
+    Key: key,
+  };
+  const imageUrl = s3.getSignedUrl("getObject", getObjectParams);
+  return imageUrl;
+};
+export const uploadMedia = async (key: ArrayBuffer, ruta: string) => {
   const stream = new Readable();
   stream.push(Buffer.from(key));
   stream.push(null);
   const params = {
-    Bucket: "xperiend-images",
-    Key: `${ruta}.pdf`,
+    Bucket: "onversedspace",
+    Key: `${ruta}`,
     Body: stream,
     ACL: "private",
   };
   s3.upload(params, function (err: any, data: any) {
     if (err) {
-      console.error("Error al subir la imagen:", err);
+      console.error("Error al subir la media:", err);
     } else {
-      console.log("Documento subido:", data.Location);
+      console.log("Media subida:", data.Location);
     }
   });
-};
-export const getDoc = async (key: string) => {
-  const getObjectParams = {
-    Bucket: "xperiend-images",
-    Key: `${key}.pdf`,
-  };
-  const imageUrl = s3.getSignedUrl("getObject", getObjectParams);
-  return imageUrl;
 };

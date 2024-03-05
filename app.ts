@@ -5,7 +5,8 @@ import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 
 import userRouter from "./routes/user";
-// import backOfficeRouter from "./routes/backoffice";
+import backOfficeRouter from "./routes/backoffice";
+import designs from "./routes/designs";
 
 import bodyParser from "body-parser";
 dotenv.config();
@@ -27,7 +28,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/user", userRouter);
-// app.use("/backoffice", backOfficeRouter);
+app.use("/backoffice", backOfficeRouter);
+app.use("/designs", designs);
 
 app.use((err: any, req: any, res: any, next: any) => {
   if (err && err.error && err.error.isJoi) {

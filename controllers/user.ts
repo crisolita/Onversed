@@ -11,8 +11,7 @@ import {
   updateUserProfile,
 } from "../service/user";
 
-import { getProjectById } from "../service/backoffice";
-import { getImage, uploadImage } from "../service/aws";
+import { uploadImage } from "../service/aws";
 import { sendAuthEmail, sendWelcomeEmail } from "../service/mail";
 
 export const userRegisterController = async (req: Request, res: Response) => {
