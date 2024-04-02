@@ -4,6 +4,7 @@ import express from "express";
 import { authenticateToken } from "../middleware/auth";
 import {
   addUser,
+  createPriceToFormats,
   deleteUSer,
   getUsers,
   updateDesign,
@@ -35,5 +36,5 @@ router.post(
   isAdmin,
   updateDesign
 );
-
+router.post("/updatePriceFormat", isAdmin, createPriceToFormats);
 export default router;

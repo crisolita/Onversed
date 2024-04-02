@@ -20,6 +20,7 @@ model User {
   authToken     String?
   userProfile   userProfile[]
   designRequest designRequest[]
+  pago          pago[]
 }
 
 model userProfile {
@@ -42,50 +43,79 @@ model collections {
 }
 
 model designRequest {
-  id            Int         @id @default(autoincrement())
-  request_user  Int
-  collection_id Int
-  name  String
-  SKU   String @unique
-  format FormatDesign
-  otro String?
-  redes RRSS?
-  metaverso Metaverso?
-  model_nft String?
-  mediaPath String?
-  delivery_date DateTime?
-  status  STATUSREQUEST
-  collection    collections @relation(fields: [collection_id], references: [id])
-  user          User        @relation(fields: [request_user], references: [id])
+  id                 Int           @id @default(autoincrement())
+  request_user       Int
+  collection_id      Int
+  name               String
+  SKU                String        @unique
+  format             FormatDesign
+  otro               String?
+  price              Float?
+  redes              RRSS?
+  metaverso          Metaverso?
+  checkout_stripe_id String?
+  model_nft          String?
+  mediaPath          String?
+  delivery_date      DateTime?
+  status             STATUSREQUEST
+  collection         collections   @relation(fields: [collection_id], references: [id])
+  user               User          @relation(fields: [request_user], references: [id])
+  pago               pago[]
+}
+
+model pago {
+  id           Int           @id @default(autoincrement())
+  request_user Int
+  desing_id    Int
+  amount Float
+  checkout_id String
+  date DateTime
+  design       designRequest @relation(fields: [desing_id], references: [id])
+  user         User          @relation(fields: [request_user], references: [id])
+}
+
+model priceFormato {
+  id             Int          @id @default(autoincrement())
+  formato        FormatDesign @unique
+  price          Float
+  priceInstagram Float?
+  priceTiktok    Float?
+  priceSnap      Float?
+  priceRoblox    Float?
+  priceZepeto    Float?
 }
 
 enum UserRol {
   ADMIN
   CLIENT
 }
+
 enum FormatDesign {
-FACTORY_3D
-MARKETING_3DAVATAR
-MARKETING_3D
-RENDER_360
-RENDER_RUNWAY
-OTRO
+  FACTORY_3D
+  MARKETING_3DAVATAR
+  MARKETING_3D
+  RENDER_360
+  RENDER_RUNWAY
+  OTRO
 }
+
 enum RRSS {
-INSTAGRAM
-TIKTOK
-SNAP
+  INSTAGRAM
+  TIKTOK
+  SNAP
 }
+
 enum Metaverso {
   ROBLOX
   ZEPETO
 }
+
 enum STATUSREQUEST {
-BORRADOR
-PAGO_PENDIENTE
-ENVIADO
-EN_PROCESO
-ENTREGADO
-REVISION
-FINALIZADO
+  BORRADOR
+  PAGO_PENDIENTE
+  ENVIADO
+  EN_PROCESO
+  ENTREGADO
+  REVISION
+  FINALIZADO
 }

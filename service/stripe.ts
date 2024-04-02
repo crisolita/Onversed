@@ -2,15 +2,14 @@ const stripe = require("stripe")(process.env.SK_TEST);
 
 export const createCheckoutSession = async (
   amount: string,
-  orderId: number,
-  orderType: string
+  orderId: number
 ) => {
   try {
     const price = await stripe.prices.create({
       currency: "eur",
       unit_amount: amount,
       product_data: {
-        name: `Compra de ${orderType}`,
+        name: `Peticion de un diseño`,
       },
     });
     const session = await stripe.checkout.sessions.create({
@@ -23,10 +22,11 @@ export const createCheckoutSession = async (
           quantity: 1,
         },
       ],
+      ///ARREGLAR AQUI LOS URLS
       success_url: `https://${
         process.env.ENV == "TEST" ? `xperiendv3-dev.netlify.app` : `xperiend.io`
-      }/stripe/${orderType}/success/${orderId}`,
-      cancel_url: `https://xperiend.com/stripe//${orderType}/cancel/${orderId}`,
+      }/stripe/success/${orderId}`,
+      cancel_url: `https://xperiend.com/stripe/cancel/${orderId}`,
     });
     return session;
   } catch (e) {

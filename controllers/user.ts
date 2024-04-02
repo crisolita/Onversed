@@ -32,7 +32,7 @@ export const userRegisterController = async (req: Request, res: Response) => {
           lastname,
         },
       });
-      await sendWelcomeEmail(email);
+      await sendWelcomeEmail(email, `${firstname} ${lastname}`);
       res
         .status(200)
         .json({ email, userol: newUser.userol, firstname, lastname });

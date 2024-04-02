@@ -4,6 +4,10 @@ import { v4 as uuidv4 } from "uuid";
 import { handleImageUpload } from "./user";
 import { getMedia, uploadMedia } from "../service/aws";
 import { getUserById } from "../service/user";
+import { createCheckoutSession, validateCheckout } from "../service/stripe";
+import { updateDesign } from "./backoffice";
+import { updateDesignService } from "../service/designs";
+import { sendResponseSolicitud } from "../service/mail";
 
 export const createCollection = async (req: Request, res: Response) => {
   try {
@@ -52,6 +56,14 @@ export const createRequestDesign = async (req: Request, res: Response) => {
       return res
         .status(400)
         .json({ error: "Usuario sin perfil no puede crear coleccion" });
+    let precio = await prisma.priceFormato.findUnique({
+      where: { formato: format },
+    });
+    if (!precio)
+      return res
+        .status(400)
+        .json({ error: "No hay precio establecido para este formato" });
+
     let unique, SKU;
     SKU = uuidv4();
     console.log("hola");
@@ -87,21 +99,106 @@ export const createRequestDesign = async (req: Request, res: Response) => {
         data: { mediaPath },
       });
     }
+    let checkout;
     if (action == "VENTA") {
       ///GENERAR LINK DE PAGO O ENVIARLO? DE DONDE LO SACAMOS?
+      //cual es el precio?
+      let precioPreliminar = precio.price;
+      switch (redes) {
+        case "TIKTOK":
+          precioPreliminar += precio.priceTiktok ? precio.priceTiktok : 0;
+          break;
+        case "SNAP":
+          precioPreliminar += precio.priceSnap ? precio.priceSnap : 0;
+          break;
+        case "INSTAGRAM":
+          precioPreliminar += precio.priceInstagram ? precio.priceInstagram : 0;
+
+          break;
+      }
+      switch (metaverso) {
+        case "ROBLOX":
+          precioPreliminar += precio.priceRoblox ? precio.priceRoblox : 0;
+          break;
+        case "ZEPETO":
+          precioPreliminar += precio.priceZepeto ? precio.priceZepeto : 0;
+          break;
+      }
+      checkout = await createCheckoutSession(
+        (precioPreliminar * 100).toString(),
+        data.id
+      );
       data = await prisma.designRequest.update({
         where: { id: data.id },
-        data: { status: "PAGO_PENDIENTE" },
+        data: {
+          status: "PAGO_PENDIENTE",
+          price: precioPreliminar,
+          checkout_stripe_id: checkout.id,
+        },
       });
     }
 
-    return res.json(data);
+    return res.json({ data, paymentLink: checkout.url });
   } catch (error) {
     console.log(error);
     return res.status(500).json(error);
   }
 };
+export const confirmPayOfRequestDesign = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient; // @ts-ignore
+    const USER = req.user as User;
+    const { orderId } = req.body;
+    const user = await prisma.user.findUnique({ where: { id: USER.id } });
+    let designRequest = await prisma.designRequest.findFirst({
+      where: { id: orderId, request_user: USER.id },
+    });
+    if (!designRequest || !designRequest.price)
+      return res
+        .status(400)
+        .json({ error: "Peticion de diseño no encontrada" });
+    let pago;
+    if (
+      designRequest.checkout_stripe_id &&
+      designRequest.status == "PAGO_PENDIENTE"
+    ) {
+      const paid = await validateCheckout(designRequest.checkout_stripe_id);
+      if (paid.payment_status == "paid") {
+        pago = await prisma.pago.create({
+          data: {
+            request_user: USER.id,
+            desing_id: designRequest.id,
+            amount: designRequest.price,
+            checkout_id: designRequest.checkout_stripe_id,
+            date: new Date(),
+          },
+        });
 
+        designRequest = await updateDesignService(
+          designRequest.id,
+          { status: "ENVIADO" },
+          prisma
+        );
+        await sendResponseSolicitud(
+          USER.email,
+          `${user?.firstname} ${user?.lastname}`
+        );
+        return res.json(designRequest);
+      } else {
+        return res.status(400).json({ error: "No ha pagado" });
+      }
+    } else {
+      return res.status(400).json({ error: "Orden de pago no ha sido creada" });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+};
 export const getCollections = async (req: Request, res: Response) => {
   try {
     // @ts-ignore

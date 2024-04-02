@@ -2,7 +2,11 @@ import { PrismaClient, User } from "@prisma/client";
 import { Request, Response } from "express";
 
 import { getAllUsers, getUserById, updateUser } from "../service/user";
-import { updateDesignService } from "../service/designs";
+import {
+  createPriceFormat,
+  updateDesignService,
+  updatePriceFormat,
+} from "../service/designs";
 
 import { sendWelcomeEmail } from "../service/mail";
 import { getImage } from "../service/aws";
@@ -74,7 +78,7 @@ export const addUser = async (req: Request, res: Response) => {
         userol,
       },
     });
-    await sendWelcomeEmail(email);
+    await sendWelcomeEmail(email, `${firstname} ${lastname}`);
     return res.status(200).json(data);
   } catch (error) {
     console.log(error);
@@ -93,6 +97,55 @@ export const updateDesign = async (req: Request, res: Response) => {
       { delivery_date, status },
       prisma
     );
+    return res.status(200).json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+export const createPriceToFormats = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+    // @ts-ignore
+    const USER = req.user as User;
+    const {
+      formato,
+      price,
+      priceInstagram,
+      priceTiktok,
+      priceSnap,
+      priceRoblox,
+      priceZepeto,
+    } = req.body;
+    let data = await prisma.priceFormato.findUnique({ where: { formato } });
+    if (data) {
+      data = await updatePriceFormat(
+        data.id,
+        {
+          price,
+          priceInstagram,
+          priceTiktok,
+          priceSnap,
+          priceRoblox,
+          priceZepeto,
+        },
+        prisma
+      );
+    } else {
+      data = await createPriceFormat(
+        {
+          formato,
+          price,
+          priceInstagram,
+          priceTiktok,
+          priceSnap,
+          priceRoblox,
+          priceZepeto,
+        },
+        prisma
+      );
+    }
     return res.status(200).json(data);
   } catch (error) {
     console.log(error);
