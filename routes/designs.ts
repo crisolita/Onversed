@@ -2,15 +2,21 @@ import multer from "multer";
 import Joivalidator from "express-joi-validation";
 import express from "express";
 import {
+  confirmOrChangeDesign,
+  confirmPayOfRequestDesign,
   createCollection,
   createRequestDesign,
   getCollections,
   getDesignsRequested,
+  sendDrawDesignController,
 } from "../controllers/designs";
 import { authenticateToken } from "../middleware/auth";
 import {
+  queryConfirmChange,
+  queryConfirmPaid,
   querySchemaCreateCollection,
   querySchemaCreateRequestDesign,
+  querySendDraw,
 } from "../middleware/validation";
 const router = express.Router();
 
@@ -35,5 +41,22 @@ router.post(
 );
 router.get("/getCollections", authenticateToken, getCollections);
 router.get("/getDesigns", authenticateToken, getDesignsRequested);
-
+router.post(
+  "/confirm-change",
+  validator.body(queryConfirmChange),
+  authenticateToken,
+  confirmOrChangeDesign
+);
+router.post(
+  "/confirmPaid",
+  validator.body(queryConfirmPaid),
+  authenticateToken,
+  confirmPayOfRequestDesign
+);
+router.post(
+  "/sendDrawDesign",
+  validator.body(querySendDraw),
+  authenticateToken,
+  sendDrawDesignController
+);
 export default router;

@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import fs from "fs";
+import { FormatDesign } from "@prisma/client";
 
 dotenv.config();
 
@@ -79,6 +80,7 @@ export async function faltaDeInfoEmail(
   name: string,
   faltantes: string[]
 ) {
+  const listaFaltantes = faltantes.map((falta) => `<li>${falta}</li>`).join("");
   const mailData = {
     from: process.env.EMAILADDRESS, // sender address
     to: email, // list of receivers
@@ -86,16 +88,13 @@ export async function faltaDeInfoEmail(
     html: `<h2>UPSSS!!! </h2>
    <p> Hola ${name},
    Lamentablemente, hemos identificado que falta información necesaria para realizar tu diseño 3D. Necesitamos que nos proporciones lo siguiente:
-   ${lista(faltantes)}
+   ${listaFaltantes}
 
    Por favor, envía la información a ¿cómo?
    Gracias por tu colaboración.
    El equipo de ONVERSED</p>`,
   };
   return transporter.sendMail(mailData);
-}
-function lista(faltantes: string[]) {
-  for (let falta of faltantes) return falta;
 }
 
 export async function linkValidarDesign(
@@ -155,8 +154,13 @@ export async function noConfirmAndChanges(email: string, name: string) {
 export async function agradecimiento(
   email: string,
   name: string,
-  indicadores: string
+  indicadores: string[]
 ) {
+  // Generar los elementos de lista HTML
+  const listaIndicadores = indicadores
+    .map((indicador) => `<li>${indicador}</li>`)
+    .join("");
+
   const mailData = {
     from: process.env.EMAILADDRESS, // sender address
     to: email, // list of receivers
@@ -165,9 +169,62 @@ export async function agradecimiento(
    <p> Hola ${name},
    Queremos agradecerte haber elegido ONVERSED. Además de ofrecerte nuestras soluciones, nos enorgullece informarte sobre el impacto ambiental positivo de tu pedido.
    A continuación, te presentamos una tabla de indicadores que muestra la huella que has ahorrado con tu elección:
-  ${indicadores}
+  ${listaIndicadores}
    Gracias por contribuir a un mundo más sostenible con ONVERSED. 
    El equipo de ONVERSED
+    </p>`,
+  };
+  return transporter.sendMail(mailData);
+}
+export async function avisarAdminCambiosEnDesign(
+  design_id: number,
+  changes: string[]
+) {
+  const listaChanges = changes.map((cambio) => `<li>${cambio}</li>`).join("");
+
+  const mailData = {
+    from: process.env.EMAILADDRESS, // sender address
+    to: "hello@onversed.com", // list of receivers
+    subject: "Cambios en diseño ",
+    html: `<h2>Cambios!</h2>
+   <p> Hola Onversed,
+   Tienes que hacer cambios en el diseño con el id ${design_id}.
+   Los cambios proporcionados fueron los siguientes ${listaChanges}
+    </p>`,
+  };
+  return transporter.sendMail(mailData);
+}
+export async function avisarAdminNuevoDiseñoYaPagado(
+  design_id: number,
+  user_name: string,
+  amount: number,
+  formato: FormatDesign
+) {
+  const mailData = {
+    from: process.env.EMAILADDRESS, // sender address
+    to: "hello@onversed.com", // list of receivers
+    subject: "Nuevo diseño ",
+    html: `<h2>Nuevo diseño a crear!</h2>
+   <p> Hola Onversed,
+   Tienes que crear un nuevo diseño con el id ${design_id}.
+   El usuario que lo ha pedido es ${user_name}, el formato es ${formato} y ha pagado ${amount} por la peticion.
+    </p>`,
+  };
+  return transporter.sendMail(mailData);
+}
+export async function avisarAdminValidacionDeDiseño(
+  design_id: number,
+  user_name: string
+) {
+  const mailData = {
+    from: process.env.EMAILADDRESS, // sender address
+    to: "hello@onversed.com", // list of receivers
+    subject: "Diseño ha sido validado",
+    html: `<h2>Un nuevo diseño ha sido validado!</h2>
+   <p> Hola Onversed,
+   Tienes que confirmar un nuevo diseño con el id ${design_id} que ya ha sido validado para confirmar ultimo arte.
+   El usuario que lo ha pedido es ${user_name}.
+   Tienes que ir al panel admin y enviarle nueva fecha de entrega.
     </p>`,
   };
   return transporter.sendMail(mailData);

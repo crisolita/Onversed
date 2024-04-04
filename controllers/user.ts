@@ -244,56 +244,18 @@ export const userEditProfile = async (req: Request, res: Response) => {
   }
 };
 
-// export const getUserInfo = async (req: Request, res: Response) => {
-//   try {
-//     // @ts-ignore
-//     const prisma = req.prisma as PrismaClient;
-//     // @ts-ignore
-//     const USER = req.user as User;
-//     const user = await getUserById(USER.id, prisma);
-//     let favs = [];
-//     if (user?.favoritos) {
-//       for (let fav of user?.favoritos) {
-//         const project = await getProjectById(fav, prisma);
-//         favs.push(project);
-//       }
-//     }
-//     const orders = await prisma.orders.findMany({
-//       where: { status: "PAGADO_Y_ENTREGADO_Y_FIRMADO" },
-//     });
-//     let proyectos: number[] = [];
-//     for (let order of orders) {
-//       if (proyectos.includes(order.project_id)) continue;
-//       if (order.user_id == USER.id && order.tipo == "INTERCAMBIO") continue;
-//       proyectos.push(order.project_id);
-//     }
-//     const kycInfo = await getKycInfoByUser(USER.id, prisma);
-//     let images = [];
-//     if (kycInfo?.status == "RECHAZADO") {
-//       const kyc_images = await prisma.kycImages.findMany({
-//         where: { info_id: kycInfo.id },
-//       });
-//       for (let image of kyc_images) {
-//         images.push({ rol: image.rol, path: await getImage(image.path) });
-//       }
-//     }
-//     return res.json({
-//       user_id: USER.id,
-//       email: user?.email,
-//       referallFriend: user?.referallFriend,
-//       userName: user?.userName,
-//       googleId: user?.googleID,
-//       kycStatus: user?.kycStatus,
-//       rol: user?.userRol,
-//       newsletter: user?.newsletter,
-//       favs,
-//       motivo_rechazo_kyc: user?.motivo_rechazo_kyc,
-//       kycInfo: kycInfo?.status == "RECHAZADO" ? kycInfo : null,
-//       kycImages: kycInfo?.status == "RECHAZADO" ? images : null,
-//       proyectosInvertidos: proyectos,
-//     });
-//   } catch (error) {
-//     console.log(error);
-//     return res.status(500).json({ error: error });
-//   }
-// };
+export const getPagos = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+    // @ts-ignore
+    const USER = req.user as User;
+    let user = await getUserById(USER.id, prisma);
+    if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+    let data = await prisma.pago.findMany({ where: { request_user: USER.id } });
+    return res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};

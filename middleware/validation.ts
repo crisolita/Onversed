@@ -155,5 +155,48 @@ export const queryUpdateDesign = Joi.object({
     "REVISION",
     "FINALIZADO"
   ),
+});
+export const queryConfirmChange = Joi.object({
+  design_id: Joi.number().required(),
+  changes: Joi.array(),
+});
+export const queryConfirmPaid = Joi.object({
+  design_id: Joi.number().required(),
+});
+export const queryUpdatePrice = Joi.object({
+  formato: Joi.string().valid(
+    "FACTORY_3D",
+    "MARKETING_3DAVATAR",
+    "MARKETING_3D",
+    "RENDER_360",
+    "RENDER_RUNWAY",
+    "OTRO"
+  ),
+  price: Joi.number(),
+  priceInstagram: Joi.number(),
+  priceTiktok: Joi.number(),
+  priceSnap: Joi.number(),
+  priceRoblox: Joi.number(),
+  priceZepeto: Joi.number(),
+});
+export const queryConfirmFalta = Joi.object({
+  design_id: Joi.number().required(),
   delivery_date: Joi.string(),
+  infoFaltante: Joi.array(),
+});
+export const querySendLink = Joi.object({
+  design_id: Joi.number().required(),
+  link: Joi.string().required(),
+});
+export const querySendThanks = Joi.object({
+  design_id: Joi.number().required(),
+  indicadores: Joi.array().required(),
+});
+export const queryConfirmLastArt = Joi.object({
+  design_id: Joi.number().required(),
+  delivery_date: Joi.string().required(),
+});
+export const querySendDraw = Joi.object({
+  design_id: Joi.number().required(),
+  action: Joi.string().valid("VENTA"),
 });

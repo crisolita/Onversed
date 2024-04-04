@@ -6,14 +6,24 @@ import {
   addUser,
   createPriceToFormats,
   deleteUSer,
+  getAllPagos,
   getUsers,
-  updateDesign,
+  sendConfirmLastArt,
+  sendConfirmOrFaltaDeInfo,
+  sendLinkToUser,
+  sendThanks,
+  updateDesignStatus,
 } from "../controllers/backoffice";
 import { isAdmin } from "../middleware/isAdmin";
 import {
+  queryConfirmFalta,
+  queryConfirmLastArt,
   queryDeleteUser,
   querySchemaAddUser,
+  querySendLink,
+  querySendThanks,
   queryUpdateDesign,
+  queryUpdatePrice,
 } from "../middleware/validation";
 const router = express.Router();
 
@@ -34,7 +44,40 @@ router.post(
   "/updateDesign",
   validator.body(queryUpdateDesign),
   isAdmin,
-  updateDesign
+  updateDesignStatus
 );
-router.post("/updatePriceFormat", isAdmin, createPriceToFormats);
+router.post(
+  "/updatePriceFormat",
+  validator.body(queryUpdatePrice),
+  isAdmin,
+  createPriceToFormats
+);
+router.post(
+  "/confirm-falta",
+  validator.body(queryConfirmFalta),
+  isAdmin,
+  sendConfirmOrFaltaDeInfo
+);
+router.post(
+  "/sendLink",
+  validator.body(querySendLink),
+  isAdmin,
+  sendLinkToUser
+);
+router.post(
+  "/sendThanks",
+  validator.body(querySendThanks),
+  isAdmin,
+  sendThanks
+);
+
+router.post(
+  "/confirmLastArt",
+  validator.body(queryConfirmLastArt),
+  isAdmin,
+  sendConfirmLastArt
+);
+
+router.get("/getAllPagos", isAdmin, getAllPagos);
+
 export default router;

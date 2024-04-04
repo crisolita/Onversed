@@ -5,9 +5,15 @@ import { handleImageUpload } from "./user";
 import { getMedia, uploadMedia } from "../service/aws";
 import { getUserById } from "../service/user";
 import { createCheckoutSession, validateCheckout } from "../service/stripe";
-import { updateDesign } from "./backoffice";
 import { updateDesignService } from "../service/designs";
-import { sendResponseSolicitud } from "../service/mail";
+import {
+  avisarAdminCambiosEnDesign,
+  avisarAdminNuevoDiseñoYaPagado,
+  avisarAdminValidacionDeDiseño,
+  confirmAndValidateLastArt,
+  noConfirmAndChanges,
+  sendResponseSolicitud,
+} from "../service/mail";
 
 export const createCollection = async (req: Request, res: Response) => {
   try {
@@ -101,6 +107,7 @@ export const createRequestDesign = async (req: Request, res: Response) => {
     }
     let checkout;
     if (action == "VENTA") {
+      console.log("ENtrre aqui?");
       ///GENERAR LINK DE PAGO O ENVIARLO? DE DONDE LO SACAMOS?
       //cual es el precio?
       let precioPreliminar = precio.price;
@@ -113,7 +120,7 @@ export const createRequestDesign = async (req: Request, res: Response) => {
           break;
         case "INSTAGRAM":
           precioPreliminar += precio.priceInstagram ? precio.priceInstagram : 0;
-
+          console.log("o aki?");
           break;
       }
       switch (metaverso) {
@@ -128,6 +135,9 @@ export const createRequestDesign = async (req: Request, res: Response) => {
         (precioPreliminar * 100).toString(),
         data.id
       );
+      console.log("o aki?", checkout, "check");
+      if (!checkout)
+        return res.status(500).json({ error: "Pago con tarjeta ha fallado" });
       data = await prisma.designRequest.update({
         where: { id: data.id },
         data: {
@@ -137,8 +147,8 @@ export const createRequestDesign = async (req: Request, res: Response) => {
         },
       });
     }
-
-    return res.json({ data, paymentLink: checkout.url });
+    console.log(data, "dtaa");
+    return res.json({ data, paymentLink: checkout ? checkout.url : "" });
   } catch (error) {
     console.log(error);
     return res.status(500).json(error);
@@ -152,10 +162,10 @@ export const confirmPayOfRequestDesign = async (
     // @ts-ignore
     const prisma = req.prisma as PrismaClient; // @ts-ignore
     const USER = req.user as User;
-    const { orderId } = req.body;
+    const { design_id } = req.body;
     const user = await prisma.user.findUnique({ where: { id: USER.id } });
     let designRequest = await prisma.designRequest.findFirst({
-      where: { id: orderId, request_user: USER.id },
+      where: { id: design_id, request_user: USER.id },
     });
     if (!designRequest || !designRequest.price)
       return res
@@ -182,6 +192,12 @@ export const confirmPayOfRequestDesign = async (
           designRequest.id,
           { status: "ENVIADO" },
           prisma
+        );
+        await avisarAdminNuevoDiseñoYaPagado(
+          designRequest.id,
+          `${user?.firstname} ${user?.lastname}`,
+          designRequest.price ? designRequest.price : 0,
+          designRequest.format
         );
         await sendResponseSolicitud(
           USER.email,
@@ -235,6 +251,118 @@ export const getDesignsRequested = async (req: Request, res: Response) => {
       }
     }
     return res.json(data);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+};
+export const confirmOrChangeDesign = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient; // @ts-ignore
+    const USER = req.user as User;
+    const user = await getUserById(USER.id, prisma);
+    const { design_id, changes } = req.body;
+    const desing = await prisma.designRequest.findUnique({
+      where: { id: design_id },
+    });
+    if (
+      !desing ||
+      desing?.request_user != user?.id ||
+      desing.status != "REVISION"
+    )
+      return res.status(400).json({ error: "Diseño no encontrado" });
+    if (changes) {
+      await noConfirmAndChanges(
+        user.email,
+        `${user.firstname} ${user.lastname}`
+      );
+      ///enviar al admin
+      await avisarAdminCambiosEnDesign(design_id, changes);
+      return res.json({ data: "Cambios enviados" });
+    } else {
+      /// ENIVAR AL ADMIN QUE ACEPTO
+      await avisarAdminValidacionDeDiseño(
+        design_id,
+        `${user.firstname} ${user.lastname}`
+      );
+    }
+    return res.json({ data: "Hemos avisado tu confirmacion al admin" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+};
+export const sendDrawDesignController = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient; // @ts-ignore
+    const USER = req.user as User;
+    const { design_id, action = "VENTA" } = req.body;
+    const profile = await prisma.userProfile.findUnique({
+      where: { user_id: USER.id },
+    });
+    if (!profile)
+      return res
+        .status(400)
+        .json({ error: "Usuario sin perfil no puede crear coleccion" });
+    let design = await prisma.designRequest.findUnique({
+      where: { id: design_id },
+    });
+    if (!design || design.status != "BORRADOR")
+      return res.status(400).json({ error: "Diseño no encontrado" });
+    let precio = await prisma.priceFormato.findUnique({
+      where: { formato: design?.format },
+    });
+    if (!precio)
+      return res
+        .status(400)
+        .json({ error: "No hay precio establecido para este formato" });
+
+    let checkout;
+    if (action == "VENTA") {
+      console.log("ENtrre aqui?");
+      ///GENERAR LINK DE PAGO O ENVIARLO? DE DONDE LO SACAMOS?
+      //cual es el precio?
+      let precioPreliminar = precio.price;
+      switch (design.redes) {
+        case "TIKTOK":
+          precioPreliminar += precio.priceTiktok ? precio.priceTiktok : 0;
+          break;
+        case "SNAP":
+          precioPreliminar += precio.priceSnap ? precio.priceSnap : 0;
+          break;
+        case "INSTAGRAM":
+          precioPreliminar += precio.priceInstagram ? precio.priceInstagram : 0;
+          console.log("o aki?");
+          break;
+      }
+      switch (design.metaverso) {
+        case "ROBLOX":
+          precioPreliminar += precio.priceRoblox ? precio.priceRoblox : 0;
+          break;
+        case "ZEPETO":
+          precioPreliminar += precio.priceZepeto ? precio.priceZepeto : 0;
+          break;
+      }
+      checkout = await createCheckoutSession(
+        (precioPreliminar * 100).toString(),
+        design.id
+      );
+      console.log("o aki?", checkout, "check");
+      if (!checkout)
+        return res.status(500).json({ error: "Pago con tarjeta ha fallado" });
+      design = await prisma.designRequest.update({
+        where: { id: design.id },
+        data: {
+          status: "PAGO_PENDIENTE",
+          price: precioPreliminar,
+          checkout_stripe_id: checkout.id,
+        },
+      });
+    }
+
+    return res.json({ design, paymentLink: checkout.url });
   } catch (error) {
     console.log(error);
     return res.status(500).json(error);

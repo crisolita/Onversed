@@ -2,6 +2,7 @@ import express from "express";
 import {
   changePasswordController,
   getAuthCode,
+  getPagos,
   getRecoveryCode,
   userEditProfile,
   userLoginController,
@@ -50,4 +51,5 @@ router.post(
   authenticateToken,
   userEditProfile
 );
+router.get("/getPagosUser", authenticateToken, getPagos);
 export default router;
