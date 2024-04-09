@@ -11,7 +11,7 @@ import {
   updateUserProfile,
 } from "../service/user";
 
-import { uploadImage } from "../service/aws";
+import { getImage, uploadImage } from "../service/aws";
 import { sendAuthEmail, sendWelcomeEmail } from "../service/mail";
 
 export const userRegisterController = async (req: Request, res: Response) => {
@@ -271,6 +271,10 @@ export const getUserInfo = async (req: Request, res: Response) => {
     const userInfo = await prisma.userProfile.findUnique({
       where: { user_id: user.id },
     });
+    let foto_de_perfil;
+    if (userInfo?.foto_de_perfil) {
+      foto_de_perfil = await getImage(userInfo.foto_de_perfil);
+    }
 
     return res.json({
       userInfo,
@@ -285,6 +289,7 @@ export const getUserInfo = async (req: Request, res: Response) => {
       country: userInfo?.country,
       cif: userInfo?.cif,
       nombre_empresa: userInfo?.nombre_empresa,
+      foto_de_perfil,
       token: createJWT(user),
     });
   } catch (error) {
