@@ -87,6 +87,7 @@ export const userLoginController = async (req: Request, res: Response) => {
           firstname: user.firstname,
           lastname: user.lastname,
           token: createJWT(user),
+          userol: user.userol,
         });
       else return res.status(403).json({ error: "Token auth incorrecto." });
     } else {
@@ -257,5 +258,37 @@ export const getPagos = async (req: Request, res: Response) => {
   } catch (error) {
     console.log(error);
     res.status(500).json(error);
+  }
+};
+export const getUserInfo = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+    // @ts-ignore
+    const USER = req.user as User;
+    const user = await getUserById(USER.id, prisma);
+    if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+    const userInfo = await prisma.userProfile.findUnique({
+      where: { user_id: user.id },
+    });
+
+    return res.json({
+      userInfo,
+      email: user.email,
+      id: user.id,
+      googleId: user.id,
+      first_name: user.firstname,
+      last_name: user.lastname,
+      user_rol: user.userol,
+      domicilio: userInfo?.domicilio,
+      postal_code: userInfo?.postal_code,
+      country: userInfo?.country,
+      cif: userInfo?.cif,
+      nombre_empresa: userInfo?.nombre_empresa,
+      token: createJWT(user),
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: error });
   }
 };

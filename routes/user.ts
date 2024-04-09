@@ -4,6 +4,7 @@ import {
   getAuthCode,
   getPagos,
   getRecoveryCode,
+  getUserInfo,
   userEditProfile,
   userLoginController,
   userRegisterController,
@@ -52,4 +53,6 @@ router.post(
   userEditProfile
 );
 router.get("/getPagosUser", authenticateToken, getPagos);
+router.get("/getUserInfo", authenticateToken, getUserInfo);
+
 export default router;
