@@ -58,7 +58,7 @@ export const updateUserProfile = async (
 export const createUserProfile = async (
   data: {
     user_id: number;
-    foto_de_perfil: string;
+    foto_de_perfil?: string;
     domicilio: string;
     postal_code: string;
     country: string;

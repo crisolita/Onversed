@@ -172,6 +172,7 @@ export const userEditProfile = async (req: Request, res: Response) => {
       user_id,
     } = req?.body;
     let user = await getUserById(USER.id, prisma);
+
     if (user?.userol == "ADMIN" && user_id) {
       user = await getUserById(user_id, prisma);
     }
@@ -191,6 +192,7 @@ export const userEditProfile = async (req: Request, res: Response) => {
       );
     }
     let profile;
+
     if (userInfo) {
       console.log("hola voy a actualizar");
 
@@ -205,13 +207,15 @@ export const userEditProfile = async (req: Request, res: Response) => {
         },
         prisma
       );
-    } else if (domicilio && postal_code && country && cif && foto_de_perfil) {
+    } else if (domicilio && postal_code && country && cif) {
       console.log("hola voy a crear");
 
       profile = await createUserProfile(
         {
           user_id: user.id,
-          foto_de_perfil: `profile_user_${user.id}`,
+          foto_de_perfil: foto_de_perfil
+            ? `profile_user_${user.id}`
+            : undefined,
           domicilio,
           postal_code,
           country,
@@ -220,7 +224,7 @@ export const userEditProfile = async (req: Request, res: Response) => {
         },
         prisma
       );
-    } else if (domicilio || postal_code || country || cif || foto_de_perfil) {
+    } else if (domicilio || postal_code || country || cif) {
       return res.status(400).json({
         error:
           "Para crear informacion de perfil son requeridos todos los campos de facturacion",

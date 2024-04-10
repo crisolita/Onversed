@@ -23,7 +23,7 @@ model User {
 model userProfile {
   id             Int     @id @default(autoincrement())
   user_id        Int     @unique
-  foto_de_perfil String
+  foto_de_perfil String?
   domicilio      String
   postal_code    String
   country        String
