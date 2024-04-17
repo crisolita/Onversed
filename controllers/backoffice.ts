@@ -112,26 +112,13 @@ export const createPriceToFormats = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient;
     // @ts-ignore
     const USER = req.user as User;
-    const {
-      formato,
-      price,
-      priceInstagram,
-      priceTiktok,
-      priceSnap,
-      priceRoblox,
-      priceZepeto,
-    } = req.body;
+    const { formato, price } = req.body;
     let data = await prisma.priceFormato.findUnique({ where: { formato } });
     if (data) {
       data = await updatePriceFormat(
         data.id,
         {
           price,
-          priceInstagram,
-          priceTiktok,
-          priceSnap,
-          priceRoblox,
-          priceZepeto,
         },
         prisma
       );
@@ -140,11 +127,6 @@ export const createPriceToFormats = async (req: Request, res: Response) => {
         {
           formato,
           price,
-          priceInstagram,
-          priceTiktok,
-          priceSnap,
-          priceRoblox,
-          priceZepeto,
         },
         prisma
       );

@@ -92,7 +92,8 @@ export const querySchemaEditProfile = Joi.object({
   country: Joi.string(),
   cif: Joi.string(),
   nombre_empresa: Joi.string(),
-  user_id: Joi.string(),
+  user_id: Joi.number(),
+  userol: Joi.string().valid("CLIENT", "ADMIN"),
 });
 ///DESIGNS
 export const querySchemaCreateCollection = Joi.object({
@@ -108,11 +109,14 @@ export const querySchemaCreateRequestDesign = Joi.object({
     "MARKETING_3D",
     "RENDER_360",
     "RENDER_RUNWAY",
-    "OTRO"
+    "OTRO",
+    "INSTAGRAM",
+    "TIKTOK",
+    "SNAP",
+    "ROBLOX",
+    "ZEPETO"
   ),
   otro: Joi.string(),
-  redes: Joi.string().valid("INSTAGRAM", "TIKTOK", "SNAP"),
-  metaverso: Joi.string().valid("ROBLOX", "ZEPETO"),
   model_nft: Joi.string(),
   action: Joi.string().valid("VENTA", "GUARDAR"),
 });
@@ -170,14 +174,14 @@ export const queryUpdatePrice = Joi.object({
     "MARKETING_3D",
     "RENDER_360",
     "RENDER_RUNWAY",
-    "OTRO"
+    "OTRO",
+    "INSTAGRAM",
+    "TIKTOK",
+    "SNAP",
+    "ROBLOX",
+    "ZEPETO"
   ),
   price: Joi.number(),
-  priceInstagram: Joi.number(),
-  priceTiktok: Joi.number(),
-  priceSnap: Joi.number(),
-  priceRoblox: Joi.number(),
-  priceZepeto: Joi.number(),
 });
 export const queryConfirmFalta = Joi.object({
   design_id: Joi.number().required(),

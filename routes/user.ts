@@ -13,6 +13,7 @@ import Joivalidator from "express-joi-validation";
 import { authenticateToken } from "../middleware/auth";
 import {
   querySchemaChangePassword,
+  querySchemaEditProfile,
   querySchemaGetRecoveryCode,
   querySchemaLogin,
   querySchemaRegistro,
@@ -49,6 +50,7 @@ router.post(
 router.post(
   "/editProfile",
   upload.single("foto_de_perfil"),
+  validator.body(querySchemaEditProfile),
   authenticateToken,
   userEditProfile
 );

@@ -168,6 +168,7 @@ export const userEditProfile = async (req: Request, res: Response) => {
       postal_code,
       country,
       cif,
+      userol,
       nombre_empresa,
       user_id,
     } = req?.body;
@@ -175,6 +176,12 @@ export const userEditProfile = async (req: Request, res: Response) => {
 
     if (user?.userol == "ADMIN" && user_id) {
       user = await getUserById(user_id, prisma);
+      if (userol) {
+        await prisma.user.update({
+          where: { id: user?.id },
+          data: { userol },
+        });
+      }
     }
 
     if (!user) return res.status(404).json({ error: "Usuario no encontrado" });

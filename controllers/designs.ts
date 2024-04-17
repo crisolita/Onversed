@@ -29,7 +29,7 @@ export const createCollection = async (req: Request, res: Response) => {
         .status(400)
         .json({ error: "Usuario sin perfil no puede crear coleccion" });
     const data = await prisma.collections.create({
-      data: { name, description },
+      data: { name, description, owner_id: USER.id },
     });
     return res.json(data);
   } catch (error) {
@@ -43,16 +43,7 @@ export const createRequestDesign = async (req: Request, res: Response) => {
     // @ts-ignore
     const prisma = req.prisma as PrismaClient; // @ts-ignore
     const USER = req.user as User;
-    const {
-      name,
-      collection_id,
-      format,
-      otro,
-      redes,
-      metaverso,
-      model_nft,
-      action,
-    } = req.body;
+    const { name, collection_id, format, otro, model_nft, action } = req.body;
     const media = req.file?.buffer;
     const type = req.file?.mimetype;
     const profile = await prisma.userProfile.findUnique({
@@ -87,8 +78,6 @@ export const createRequestDesign = async (req: Request, res: Response) => {
         format,
         otro,
         SKU: SKU,
-        redes,
-        metaverso,
         model_nft,
         status: "BORRADOR",
       },
@@ -111,26 +100,7 @@ export const createRequestDesign = async (req: Request, res: Response) => {
       ///GENERAR LINK DE PAGO O ENVIARLO? DE DONDE LO SACAMOS?
       //cual es el precio?
       let precioPreliminar = precio.price;
-      switch (redes) {
-        case "TIKTOK":
-          precioPreliminar += precio.priceTiktok ? precio.priceTiktok : 0;
-          break;
-        case "SNAP":
-          precioPreliminar += precio.priceSnap ? precio.priceSnap : 0;
-          break;
-        case "INSTAGRAM":
-          precioPreliminar += precio.priceInstagram ? precio.priceInstagram : 0;
-          console.log("o aki?");
-          break;
-      }
-      switch (metaverso) {
-        case "ROBLOX":
-          precioPreliminar += precio.priceRoblox ? precio.priceRoblox : 0;
-          break;
-        case "ZEPETO":
-          precioPreliminar += precio.priceZepeto ? precio.priceZepeto : 0;
-          break;
-      }
+
       checkout = await createCheckoutSession(
         (precioPreliminar * 100).toString(),
         data.id
@@ -220,7 +190,9 @@ export const getCollections = async (req: Request, res: Response) => {
     // @ts-ignore
     const prisma = req.prisma as PrismaClient; // @ts-ignore
     const USER = req.user as User;
-    const data = await prisma.collections.findMany();
+    const data = await prisma.collections.findMany({
+      where: { owner_id: USER.id },
+    });
     return res.json(data);
   } catch (error) {
     console.log(error);
@@ -325,26 +297,7 @@ export const sendDrawDesignController = async (req: Request, res: Response) => {
       ///GENERAR LINK DE PAGO O ENVIARLO? DE DONDE LO SACAMOS?
       //cual es el precio?
       let precioPreliminar = precio.price;
-      switch (design.redes) {
-        case "TIKTOK":
-          precioPreliminar += precio.priceTiktok ? precio.priceTiktok : 0;
-          break;
-        case "SNAP":
-          precioPreliminar += precio.priceSnap ? precio.priceSnap : 0;
-          break;
-        case "INSTAGRAM":
-          precioPreliminar += precio.priceInstagram ? precio.priceInstagram : 0;
-          console.log("o aki?");
-          break;
-      }
-      switch (design.metaverso) {
-        case "ROBLOX":
-          precioPreliminar += precio.priceRoblox ? precio.priceRoblox : 0;
-          break;
-        case "ZEPETO":
-          precioPreliminar += precio.priceZepeto ? precio.priceZepeto : 0;
-          break;
-      }
+
       checkout = await createCheckoutSession(
         (precioPreliminar * 100).toString(),
         design.id

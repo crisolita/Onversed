@@ -18,6 +18,7 @@ model User {
   designRequest designRequest[]
   pago          pago[]
   userProfile   userProfile?
+  collections   collections[]
 }
 
 model userProfile {
@@ -36,6 +37,8 @@ model collections {
   id            Int             @id @default(autoincrement())
   name          String
   description   String?
+  owner_id      Int
+  user          User            @relation(fields: [owner_id], references: [id])
   designRequest designRequest[]
 }
 
@@ -47,8 +50,6 @@ model designRequest {
   SKU                String        @unique
   format             FormatDesign
   otro               String?
-  redes              RRSS?
-  metaverso          Metaverso?
   model_nft          String?
   status             STATUSREQUEST
   mediaPath          String?
@@ -75,11 +76,6 @@ model priceFormato {
   id             Int          @id @default(autoincrement())
   formato        FormatDesign @unique
   price          Float
-  priceInstagram Float?
-  priceTiktok    Float?
-  priceSnap      Float?
-  priceRoblox    Float?
-  priceZepeto    Float?
 }
 
 enum UserRol {
@@ -93,18 +89,12 @@ enum FormatDesign {
   MARKETING_3D
   RENDER_360
   RENDER_RUNWAY
-  OTRO
-}
-
-enum RRSS {
   INSTAGRAM
   TIKTOK
   SNAP
-}
-
-enum Metaverso {
   ROBLOX
   ZEPETO
+  OTRO
 }
 
 enum STATUSREQUEST {
