@@ -43,7 +43,15 @@ export const createRequestDesign = async (req: Request, res: Response) => {
     // @ts-ignore
     const prisma = req.prisma as PrismaClient; // @ts-ignore
     const USER = req.user as User;
-    const { name, collection_id, format, otro, model_nft, action } = req.body;
+    const {
+      name,
+      collection_id,
+      format,
+      otro,
+      model_nft,
+      action,
+      medialinkexternal,
+    } = req.body;
     const media = req.file?.buffer;
     const type = req.file?.mimetype;
     const profile = await prisma.userProfile.findUnique({
@@ -80,6 +88,7 @@ export const createRequestDesign = async (req: Request, res: Response) => {
         SKU: SKU,
         model_nft,
         status: "BORRADOR",
+        mediaLinkExternalFile: medialinkexternal,
       },
     });
 

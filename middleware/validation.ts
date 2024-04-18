@@ -118,6 +118,7 @@ export const querySchemaCreateRequestDesign = Joi.object({
   ),
   otro: Joi.string(),
   model_nft: Joi.string(),
+  medialinkexternal: Joi.string(),
   action: Joi.string().valid("VENTA", "GUARDAR"),
 });
 
