@@ -20,7 +20,7 @@ export async function sendAuthEmail(email: string, authCode: string) {
     from: process.env.EMAILADDRESS, // sender address
     to: email, // list of receivers
     subject: "CODIGO DE VALIDACION",
-    html: `<p>Codigo de validacion para acceder a Onversed ${authCode}</p>`,
+    html: `<p>Codigo de validacion para acceder a Onversed </p> <h1 style="color:#0000ff">${authCode}</h1>`,
   };
   return transporter.sendMail(mailData);
 }
