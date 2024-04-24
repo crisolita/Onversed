@@ -1,6 +1,5 @@
 import { PrismaClient, User } from "@prisma/client";
 import { Request, Response } from "express";
-import { v4 as uuidv4 } from "uuid";
 import { handleImageUpload } from "./user";
 import { getMedia, uploadMedia } from "../service/aws";
 import { getUserById } from "../service/user";
@@ -51,6 +50,7 @@ export const createRequestDesign = async (req: Request, res: Response) => {
       model_nft,
       action,
       medialinkexternal,
+      SKU,
     } = req.body;
     const media = req.file?.buffer;
     const type = req.file?.mimetype;
@@ -69,15 +69,8 @@ export const createRequestDesign = async (req: Request, res: Response) => {
         .status(400)
         .json({ error: "No hay precio establecido para este formato" });
 
-    let unique, SKU;
-    SKU = uuidv4();
-    console.log("hola");
-    while (!unique) {
-      console.log("hola aqui dentro");
-      SKU = uuidv4();
-      unique = await prisma.designRequest.findUnique({ where: { SKU } });
-      if (!unique) unique = true;
-    }
+    let unique = await prisma.designRequest.findUnique({ where: { SKU } });
+    if (unique) return res.status(400).json({ error: "SKU ya existe" });
     let data = await prisma.designRequest.create({
       data: {
         request_user: USER.id,
@@ -85,7 +78,7 @@ export const createRequestDesign = async (req: Request, res: Response) => {
         collection_id,
         format,
         otro,
-        SKU: SKU,
+        SKU,
         model_nft,
         status: "BORRADOR",
         mediaLinkExternalFile: medialinkexternal,
