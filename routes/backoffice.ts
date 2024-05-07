@@ -5,6 +5,7 @@ import { authenticateToken } from "../middleware/auth";
 import {
   addUser,
   createPriceToFormats,
+  createPriceToProducts,
   deleteUSer,
   getAllPagos,
   getUsers,
@@ -24,6 +25,7 @@ import {
   querySendThanks,
   queryUpdateDesign,
   queryUpdatePrice,
+  queryUpdatePriceProduct,
 } from "../middleware/validation";
 const router = express.Router();
 
@@ -79,5 +81,10 @@ router.post(
 );
 
 router.get("/getAllPagos", isAdmin, getAllPagos);
-
+router.post(
+  "/updatePriceProduct",
+  validator.body(queryUpdatePriceProduct),
+  isAdmin,
+  createPriceToProducts
+);
 export default router;

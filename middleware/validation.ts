@@ -117,6 +117,7 @@ export const querySchemaCreateRequestDesign = Joi.object({
     "ZEPETO"
   ),
   otro: Joi.string(),
+  producto: Joi.string().valid("A", "B", "C"),
   model_nft: Joi.string(),
   medialinkexternal: Joi.string(),
   SKU: Joi.string(),
@@ -183,6 +184,11 @@ export const queryUpdatePrice = Joi.object({
     "ROBLOX",
     "ZEPETO"
   ),
+  price: Joi.number(),
+});
+
+export const queryUpdatePriceProduct = Joi.object({
+  producto: Joi.string().valid("A", "B", "C"),
   price: Joi.number(),
 });
 export const queryConfirmFalta = Joi.object({

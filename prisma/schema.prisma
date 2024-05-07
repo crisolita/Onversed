@@ -57,6 +57,7 @@ model designRequest {
   price              Float?
   checkout_stripe_id String?
   mediaLinkExternalFile String?
+  productType PRODUCTO?
   collection         collections   @relation(fields: [collection_id], references: [id])
   user               User          @relation(fields: [request_user], references: [id])
   pago               pago[]
@@ -78,12 +79,21 @@ model priceFormato {
   formato        FormatDesign @unique
   price          Float
 }
+model priceProducto {
+  id             Int          @id @default(autoincrement())
+  producto        PRODUCTO @unique
+  price          Float
+}
 
 enum UserRol {
   ADMIN
   CLIENT
 }
-
+enum PRODUCTO {
+  A
+  B
+  C
+}
 enum FormatDesign {
   FACTORY_3D
   MARKETING_3DAVATAR

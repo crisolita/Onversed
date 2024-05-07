@@ -1,4 +1,9 @@
-import { FormatDesign, PrismaClient, STATUSREQUEST } from "@prisma/client";
+import {
+  FormatDesign,
+  PRODUCTO,
+  PrismaClient,
+  STATUSREQUEST,
+} from "@prisma/client";
 
 export const updateDesignService = async (
   id: number,
@@ -47,6 +52,33 @@ export const createPriceFormat = async (
   prisma: PrismaClient
 ) => {
   return await prisma.priceFormato.create({
+    data: {
+      ...data,
+    },
+  });
+};
+export const updatePriceProducto = async (
+  id: number,
+  data: {
+    price?: number;
+  },
+  prisma: PrismaClient
+) => {
+  return await prisma.priceProducto.update({
+    where: { id: id },
+    data: {
+      ...data,
+    },
+  });
+};
+export const createPriceProducto = async (
+  data: {
+    producto: PRODUCTO;
+    price: number;
+  },
+  prisma: PrismaClient
+) => {
+  return await prisma.priceProducto.create({
     data: {
       ...data,
     },

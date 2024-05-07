@@ -50,6 +50,7 @@ export const createRequestDesign = async (req: Request, res: Response) => {
       model_nft,
       action,
       medialinkexternal,
+      producto,
       SKU,
     } = req.body;
     const media = req.file?.buffer;
@@ -81,6 +82,7 @@ export const createRequestDesign = async (req: Request, res: Response) => {
         SKU,
         model_nft,
         status: "BORRADOR",
+        productType: producto,
         mediaLinkExternalFile: medialinkexternal,
       },
     });
@@ -102,7 +104,12 @@ export const createRequestDesign = async (req: Request, res: Response) => {
       ///GENERAR LINK DE PAGO O ENVIARLO? DE DONDE LO SACAMOS?
       //cual es el precio?
       let precioPreliminar = precio.price;
-
+      if (data.productType) {
+        const priceOfProduct = await prisma.priceProducto.findUnique({
+          where: { producto: data.productType },
+        });
+        precioPreliminar += priceOfProduct?.price ? priceOfProduct.price : 0;
+      }
       checkout = await createCheckoutSession(
         (precioPreliminar * 100).toString(),
         data.id
@@ -288,6 +295,7 @@ export const sendDrawDesignController = async (req: Request, res: Response) => {
     let precio = await prisma.priceFormato.findUnique({
       where: { formato: design?.format },
     });
+
     if (!precio)
       return res
         .status(400)
@@ -299,7 +307,12 @@ export const sendDrawDesignController = async (req: Request, res: Response) => {
       ///GENERAR LINK DE PAGO O ENVIARLO? DE DONDE LO SACAMOS?
       //cual es el precio?
       let precioPreliminar = precio.price;
-
+      if (design.productType) {
+        const priceOfProduct = await prisma.priceProducto.findUnique({
+          where: { producto: design.productType },
+        });
+        precioPreliminar += priceOfProduct?.price ? priceOfProduct.price : 0;
+      }
       checkout = await createCheckoutSession(
         (precioPreliminar * 100).toString(),
         design.id

@@ -4,8 +4,10 @@ import { Request, Response } from "express";
 import { getAllUsers, getUserById, updateUser } from "../service/user";
 import {
   createPriceFormat,
+  createPriceProducto,
   updateDesignService,
   updatePriceFormat,
+  updatePriceProducto,
 } from "../service/designs";
 
 import {
@@ -126,6 +128,37 @@ export const createPriceToFormats = async (req: Request, res: Response) => {
       data = await createPriceFormat(
         {
           formato,
+          price,
+        },
+        prisma
+      );
+    }
+    return res.status(200).json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+export const createPriceToProducts = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+    // @ts-ignore
+    const USER = req.user as User;
+    const { producto, price } = req.body;
+    let data = await prisma.priceProducto.findUnique({ where: { producto } });
+    if (data) {
+      data = await updatePriceProducto(
+        data.id,
+        {
+          price,
+        },
+        prisma
+      );
+    } else {
+      data = await createPriceProducto(
+        {
+          producto,
           price,
         },
         prisma
