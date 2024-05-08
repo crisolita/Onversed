@@ -6,6 +6,7 @@ import {
   addUser,
   createPriceToFormats,
   createPriceToProducts,
+  createRelationPrendaProduct,
   deleteUSer,
   getAllPagos,
   getUsers,
@@ -87,4 +88,5 @@ router.post(
   isAdmin,
   createPriceToProducts
 );
+router.post("/createPrendaRelation", isAdmin, createRelationPrendaProduct);
 export default router;

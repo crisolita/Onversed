@@ -329,3 +329,38 @@ export const getAllPagos = async (req: Request, res: Response) => {
     res.status(500).json(error);
   }
 };
+
+export const createRelationPrendaProduct = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+    // @ts-ignore
+    const USER = req.user as User;
+    const { producto, prenda } = req.body;
+    let data = await prisma.relationPrendaPrecio.findUnique({
+      where: { prenda },
+    });
+    if (data) {
+      data = await prisma.relationPrendaPrecio.update({
+        where: { prenda },
+        data: {
+          producto,
+        },
+      });
+    } else {
+      data = await prisma.relationPrendaPrecio.create({
+        data: {
+          prenda,
+          producto,
+        },
+      });
+    }
+    return res.status(200).json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};

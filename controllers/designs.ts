@@ -50,7 +50,7 @@ export const createRequestDesign = async (req: Request, res: Response) => {
       model_nft,
       action,
       medialinkexternal,
-      producto,
+      prenda,
       SKU,
     } = req.body;
     const media = req.file?.buffer;
@@ -72,6 +72,12 @@ export const createRequestDesign = async (req: Request, res: Response) => {
 
     let unique = await prisma.designRequest.findUnique({ where: { SKU } });
     if (unique) return res.status(400).json({ error: "SKU ya existe" });
+    let relationPP;
+    if (prenda) {
+      relationPP = await prisma.relationPrendaPrecio.findUnique({
+        where: { prenda },
+      });
+    }
     let data = await prisma.designRequest.create({
       data: {
         request_user: USER.id,
@@ -82,7 +88,8 @@ export const createRequestDesign = async (req: Request, res: Response) => {
         SKU,
         model_nft,
         status: "BORRADOR",
-        productType: producto,
+        productType: relationPP?.producto,
+        prenda: relationPP?.prenda,
         mediaLinkExternalFile: medialinkexternal,
       },
     });
@@ -108,7 +115,7 @@ export const createRequestDesign = async (req: Request, res: Response) => {
         const priceOfProduct = await prisma.priceProducto.findUnique({
           where: { producto: data.productType },
         });
-        precioPreliminar += priceOfProduct?.price ? priceOfProduct.price : 0;
+        precioPreliminar += priceOfProduct?.price ? priceOfProduct.price : 1;
       }
       checkout = await createCheckoutSession(
         (precioPreliminar * 100).toString(),
@@ -311,7 +318,7 @@ export const sendDrawDesignController = async (req: Request, res: Response) => {
         const priceOfProduct = await prisma.priceProducto.findUnique({
           where: { producto: design.productType },
         });
-        precioPreliminar += priceOfProduct?.price ? priceOfProduct.price : 0;
+        precioPreliminar += priceOfProduct?.price ? priceOfProduct.price : 1;
       }
       checkout = await createCheckoutSession(
         (precioPreliminar * 100).toString(),

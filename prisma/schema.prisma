@@ -58,6 +58,7 @@ model designRequest {
   checkout_stripe_id String?
   mediaLinkExternalFile String?
   productType PRODUCTO?
+  prenda PRENDA?
   collection         collections   @relation(fields: [collection_id], references: [id])
   user               User          @relation(fields: [request_user], references: [id])
   pago               pago[]
@@ -84,10 +85,35 @@ model priceProducto {
   producto        PRODUCTO @unique
   price          Float
 }
+model relationPrendaPrecio {
+  id             Int          @id @default(autoincrement())
+  producto        PRODUCTO @unique
+  prenda          PRENDA @unique
+  }
 
 enum UserRol {
   ADMIN
   CLIENT
+}
+enum PRENDA {
+  ABRIGOS_BLAZERS
+  ACCESORIOS
+  BANADORES_BIKINIS
+  BOLSOS
+  CAMISAS
+  CAMISETAS_POLOS
+  CARDIGANS_JERSEYS
+  CHAQUETAS_CAZADORAS
+  FALDAS
+  JEANS_PANTALONES
+  JOYAS_BISUTERIE
+  SHORTS_BERMUDAS
+  SPORT
+  SUDADERAS
+  TOPS_BODIES
+  TRAJES_SMOKING
+  VESTIDOS
+  VESTIDO_INVITADAS
 }
 enum PRODUCTO {
   A
