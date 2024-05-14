@@ -89,6 +89,8 @@ export const querySchemaEditProfile = Joi.object({
   foto_de_perfil: Joi.string(),
   domicilio: Joi.string(),
   postal_code: Joi.string(),
+  provincia: Joi.string(),
+  municipio: Joi.string(),
   country: Joi.string(),
   cif: Joi.string(),
   nombre_empresa: Joi.string(),
@@ -117,6 +119,7 @@ export const querySchemaCreateRequestDesign = Joi.object({
     "ZEPETO"
   ),
   otro: Joi.string(),
+  otra_prenda: Joi.string(),
   prenda: Joi.string().valid(
     "ABRIGOS_BLAZERS",
     "ACCESORIOS",
@@ -135,7 +138,8 @@ export const querySchemaCreateRequestDesign = Joi.object({
     "TOPS_BODIES",
     "TRAJES_SMOKING",
     "VESTIDOS",
-    "VESTIDO_INVITADAS"
+    "VESTIDO_INVITADAS",
+    "OTROS"
   ),
   model_nft: Joi.string(),
   medialinkexternal: Joi.string(),

@@ -60,6 +60,7 @@ model designRequest {
   checkout_stripe_id String?
   mediaLinkExternalFile String?
   productType PRODUCTO?
+  otra_prenda String?
   prenda PRENDA?
   collection         collections   @relation(fields: [collection_id], references: [id])
   user               User          @relation(fields: [request_user], references: [id])
