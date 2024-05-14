@@ -169,6 +169,8 @@ export const userEditProfile = async (req: Request, res: Response) => {
       country,
       cif,
       userol,
+      municipio,
+      provincia,
       nombre_empresa,
       user_id,
     } = req?.body;
@@ -209,6 +211,8 @@ export const userEditProfile = async (req: Request, res: Response) => {
           domicilio,
           postal_code,
           country,
+          municipio,
+          provincia,
           cif,
           nombre_empresa,
         },
@@ -225,12 +229,17 @@ export const userEditProfile = async (req: Request, res: Response) => {
             : undefined,
           domicilio,
           postal_code,
+          municipio,
+          provincia,
           country,
           cif,
           nombre_empresa,
         },
         prisma
       );
+      await prisma.collections.create({
+        data: { name: "DEFAULT", owner_id: USER.id },
+      });
     } else if (domicilio || postal_code || country || cif) {
       return res.status(400).json({
         error:

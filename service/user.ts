@@ -43,6 +43,8 @@ export const updateUserProfile = async (
     postal_code?: string;
     country?: string;
     cif?: string;
+    municipio?: string;
+    provincia?: string;
     nombre_empresa?: string;
   },
   prisma: PrismaClient
@@ -62,6 +64,8 @@ export const createUserProfile = async (
     domicilio: string;
     postal_code: string;
     country: string;
+    municipio?: string;
+    provincia?: string;
     cif?: string;
     nombre_empresa?: string;
   },

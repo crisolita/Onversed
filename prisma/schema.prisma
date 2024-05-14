@@ -28,6 +28,8 @@ model userProfile {
   domicilio      String
   postal_code    String
   country        String
+  municipio String?
+  provincia String?
   cif            String?
   nombre_empresa String?
   user           User    @relation(fields: [user_id], references: [id])
@@ -114,6 +116,7 @@ enum PRENDA {
   TRAJES_SMOKING
   VESTIDOS
   VESTIDO_INVITADAS
+  OTROS
 }
 enum PRODUCTO {
   A
