@@ -70,9 +70,10 @@ export const createRequestDesign = async (req: Request, res: Response) => {
       return res
         .status(400)
         .json({ error: "No hay precio establecido para este formato" });
-
-    let unique = await prisma.designRequest.findUnique({ where: { SKU } });
-    if (unique) return res.status(400).json({ error: "SKU ya existe" });
+    if (SKU) {
+      let unique = await prisma.designRequest.findUnique({ where: { SKU } });
+      if (unique) return res.status(400).json({ error: "SKU ya existe" });
+    }
     let relationPP;
     if (prenda) {
       relationPP = await prisma.relationPrendaPrecio.findUnique({

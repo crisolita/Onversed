@@ -34,8 +34,7 @@ router.post(
   userRegisterController
 );
 router.post("/login", validator.body(querySchemaLogin), userLoginController);
-router.post("/getAuth", validator.body(querySchemaUGetAuth), getAuthCode);
-// router.get("/userInfo", authenticateToken, getUserInfo);
+router.post("/validate", validator.body(querySchemaUGetAuth), getAuthCode);
 
 router.post(
   "/getRecovery",

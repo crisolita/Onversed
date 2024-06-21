@@ -15,6 +15,7 @@ model User {
   lastname      String
   authToken     String?
   userol        UserRol
+    validated Boolean?
   designRequest designRequest[]
   pago          pago[]
   userProfile   userProfile?
@@ -49,7 +50,7 @@ model designRequest {
   request_user       Int
   collection_id      Int
   name               String
-  SKU                String        @unique
+  SKU                String?        @unique
   format             FormatDesign
   otro               String?
   model_nft          String?

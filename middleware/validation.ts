@@ -25,6 +25,18 @@ export const querySchemaRegistro = Joi.object({
   lastname: Joi.string().required(),
 });
 export const querySchemaUGetAuth = Joi.object({
+  email: Joi.string()
+    .email({ minDomainSegments: 2 })
+    .required()
+    .messages({ "string.default": "El email debe ser valido" }),
+  authCode: Joi.string().required(),
+});
+
+export const querySchemaLogin = Joi.object({
+  email: Joi.string()
+    .email({ minDomainSegments: 2 })
+    .required()
+    .messages({ "string.default": "El email debe ser valido" }),
   password: Joi.string()
     .required()
     .pattern(
@@ -39,18 +51,6 @@ export const querySchemaUGetAuth = Joi.object({
       "string.required": `Contraseña es requerida`,
       "string.pattern.base": "No cumple las condiciones de contraseña",
     }),
-  email: Joi.string()
-    .email({ minDomainSegments: 2 })
-    .required()
-    .messages({ "string.default": "El email debe ser valido" }),
-});
-
-export const querySchemaLogin = Joi.object({
-  email: Joi.string()
-    .email({ minDomainSegments: 2 })
-    .required()
-    .messages({ "string.default": "El email debe ser valido" }),
-  authCode: Joi.string().required(),
 });
 export const querySchemaGetRecoveryCode = Joi.object({
   email: Joi.string().email({ minDomainSegments: 2 }).required().messages({

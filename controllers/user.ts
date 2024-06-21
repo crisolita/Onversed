@@ -46,26 +46,27 @@ export const userRegisterController = async (req: Request, res: Response) => {
 };
 export const getAuthCode = async (req: Request, res: Response) => {
   try {
-    let authCode = JSON.stringify(
-      Math.round(Math.random() * (999999 - 100000) + 100000)
-    );
-    const salt = bcrypt.genSaltSync();
     // @ts-ignore
     const prisma = req.prisma as PrismaClient;
-    const { email, password } = req?.body;
+    const { email, authCode } = req?.body;
     const user = await getUserByEmail(email, prisma);
-    if (user && user.password && bcrypt.compareSync(password, user.password)) {
-      await sendAuthEmail(email, authCode);
-      await updateUser(
-        user.id,
-        { authToken: bcrypt.hashSync(authCode, salt) },
-        prisma
-      );
-      return res.status(200).json({
-        data: `Se ha enviado código de validación al correo: ${email}`,
-      });
+    if (user) {
+      if (bcrypt.compareSync(authCode, user.authToken ? user.authToken : "")) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { validated: true },
+        });
+        return res.status(200).json({
+          email: user.email,
+          userid: user.id,
+          firstname: user.firstname,
+          lastname: user.lastname,
+          token: createJWT(user),
+          userol: user.userol,
+        });
+      } else return res.status(403).json({ error: "Token auth incorrecto." });
     } else {
-      res.status(400).json({ error: "Email o contraaseña incorrectos" });
+      return res.status(400).json({ error: "Email incorrecto" });
     }
   } catch (error) {
     console.log(error);
@@ -77,11 +78,26 @@ export const userLoginController = async (req: Request, res: Response) => {
   try {
     // @ts-ignore
     const prisma = req.prisma as PrismaClient;
-    const { email, authCode } = req?.body;
+    const { email, password } = req?.body;
     const user = await getUserByEmail(email, prisma);
-    if (user) {
-      if (bcrypt.compareSync(authCode, user.authToken ? user.authToken : ""))
+    const salt = bcrypt.genSaltSync();
+
+    if (user && user.password && bcrypt.compareSync(password, user.password)) {
+      if (!user.validated) {
+        let authCode = JSON.stringify(
+          Math.round(Math.random() * (999999 - 100000) + 100000)
+        );
+        await sendAuthEmail(email, authCode);
+        await updateUser(
+          user.id,
+          { authToken: bcrypt.hashSync(authCode, salt) },
+          prisma
+        );
         return res.status(200).json({
+          data: `Se ha enviado código de validación al correo: ${email}`,
+        });
+      } else {
+        res.status(200).json({
           email: user.email,
           userid: user.id,
           firstname: user.firstname,
@@ -89,9 +105,9 @@ export const userLoginController = async (req: Request, res: Response) => {
           token: createJWT(user),
           userol: user.userol,
         });
-      else return res.status(403).json({ error: "Token auth incorrecto." });
+      }
     } else {
-      return res.status(400).json({ error: "Email incorrecto" });
+      res.status(400).json({ error: "Email o contraaseña incorrectos" });
     }
   } catch (error) {
     console.log(error);
