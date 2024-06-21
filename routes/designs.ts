@@ -6,6 +6,7 @@ import {
   confirmPayOfRequestDesign,
   createCollection,
   createRequestDesign,
+  editDrawDesignController,
   getCollections,
   getDesignsRequested,
   sendDrawDesignController,
@@ -14,6 +15,7 @@ import { authenticateToken } from "../middleware/auth";
 import {
   queryConfirmChange,
   queryConfirmPaid,
+  queryEditDraw,
   querySchemaCreateCollection,
   querySchemaCreateRequestDesign,
   querySendDraw,
@@ -58,5 +60,11 @@ router.post(
   validator.body(querySendDraw),
   authenticateToken,
   sendDrawDesignController
+);
+router.post(
+  "/editDrawDesign",
+  validator.body(queryEditDraw),
+  authenticateToken,
+  editDrawDesignController
 );
 export default router;

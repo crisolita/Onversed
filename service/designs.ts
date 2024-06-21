@@ -1,5 +1,6 @@
 import {
   FormatDesign,
+  PRENDA,
   PRODUCTO,
   PrismaClient,
   STATUSREQUEST,
@@ -79,6 +80,26 @@ export const createPriceProducto = async (
   prisma: PrismaClient
 ) => {
   return await prisma.priceProducto.create({
+    data: {
+      ...data,
+    },
+  });
+};
+
+export const updateDrawDesign = async (
+  id: number,
+  data: {
+    name?: string;
+    SKU?: string;
+    format?: FormatDesign;
+    otro?: string;
+    otra_prenda?: string;
+    prenda?: PRENDA;
+  },
+  prisma: PrismaClient
+) => {
+  return await prisma.designRequest.update({
+    where: { id: id },
     data: {
       ...data,
     },

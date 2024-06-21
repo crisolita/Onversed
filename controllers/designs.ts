@@ -4,7 +4,7 @@ import { handleImageUpload } from "./user";
 import { getMedia, uploadMedia } from "../service/aws";
 import { getUserById } from "../service/user";
 import { createCheckoutSession, validateCheckout } from "../service/stripe";
-import { updateDesignService } from "../service/designs";
+import { updateDesignService, updateDrawDesign } from "../service/designs";
 import {
   avisarAdminCambiosEnDesign,
   avisarAdminNuevoDiseñoYaPagado,
@@ -290,17 +290,15 @@ export const sendDrawDesignController = async (req: Request, res: Response) => {
     const prisma = req.prisma as PrismaClient; // @ts-ignore
     const USER = req.user as User;
     const { design_id, action = "VENTA" } = req.body;
-    const profile = await prisma.userProfile.findUnique({
-      where: { user_id: USER.id },
-    });
-    if (!profile)
-      return res
-        .status(400)
-        .json({ error: "Usuario sin perfil no puede crear coleccion" });
+
     let design = await prisma.designRequest.findUnique({
       where: { id: design_id },
     });
-    if (!design || design.status != "BORRADOR")
+    if (
+      !design ||
+      design.status != "BORRADOR" ||
+      design.request_user != USER.id
+    )
       return res.status(400).json({ error: "Diseño no encontrado" });
     let precio = await prisma.priceFormato.findUnique({
       where: { formato: design?.format },
@@ -341,6 +339,45 @@ export const sendDrawDesignController = async (req: Request, res: Response) => {
     }
 
     return res.json({ design, paymentLink: checkout.url });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+};
+export const editDrawDesignController = async (req: Request, res: Response) => {
+  try {
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient; // @ts-ignore
+    const USER = req.user as User;
+    const { design_id, name, SKU, format, otro, otra_prenda, prenda } =
+      req.body;
+
+    let design = await prisma.designRequest.findUnique({
+      where: { id: design_id },
+    });
+    if (
+      !design ||
+      design.status != "BORRADOR" ||
+      design.request_user != USER.id
+    )
+      return res.status(400).json({ error: "Diseño no encontrado" });
+    if (SKU) {
+      let unique = await prisma.designRequest.findUnique({ where: { SKU } });
+      if (unique) return res.status(400).json({ error: "SKU YA UTILIZADO" });
+    }
+    design = await updateDrawDesign(
+      design_id,
+      {
+        name,
+        SKU,
+        format,
+        otro,
+        otra_prenda,
+        prenda,
+      },
+      prisma
+    );
+    return res.json(design);
   } catch (error) {
     console.log(error);
     return res.status(500).json(error);
