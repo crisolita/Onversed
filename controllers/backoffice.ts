@@ -54,10 +54,17 @@ export const deleteUSer = async (req: Request, res: Response) => {
     // const USER= req.user as User;
     const { user_id } = req.body;
     const profile = await prisma.userProfile.findUnique({ where: { user_id } });
+
     const designRequest = await prisma.designRequest.findMany({
       where: { request_user: user_id },
     });
-    if (profile) await prisma.userProfile.delete({ where: { user_id } });
+    if (profile) {
+      await prisma.userProfile.delete({ where: { user_id } });
+      const collection = await prisma.collections.deleteMany({
+        where: { owner_id: user_id },
+      });
+    }
+
     if (designRequest)
       await prisma.designRequest.deleteMany({
         where: { request_user: user_id },
