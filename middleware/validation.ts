@@ -276,3 +276,7 @@ export const queryEditDraw = Joi.object({
     "OTROS"
   ),
 });
+
+export const querySchemaGoogle = Joi.object({
+  token: Joi.string().required(),
+});

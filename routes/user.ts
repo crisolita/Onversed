@@ -6,6 +6,7 @@ import {
   getRecoveryCode,
   getUserInfo,
   userEditProfile,
+  userGoogleController,
   userLoginController,
   userRegisterController,
 } from "../controllers/user";
@@ -15,6 +16,7 @@ import {
   querySchemaChangePassword,
   querySchemaEditProfile,
   querySchemaGetRecoveryCode,
+  querySchemaGoogle,
   querySchemaLogin,
   querySchemaRegistro,
   querySchemaUGetAuth,
@@ -55,5 +57,9 @@ router.post(
 );
 router.get("/getPagosUser", authenticateToken, getPagos);
 router.get("/getUserInfo", authenticateToken, getUserInfo);
-
+router.post(
+  "/registerLoginGoogle",
+  validator.body(querySchemaGoogle),
+  userGoogleController
+);
 export default router;

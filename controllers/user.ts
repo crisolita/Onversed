@@ -3,16 +3,18 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { createJWT } from "../utils/utils";
 import {
+  createUser,
   createUserProfile,
   getAllUsers,
   getUserByEmail,
+  getUserByGoogleID,
   getUserById,
   updateUser,
   updateUserProfile,
 } from "../service/user";
-
 import { getImage, uploadImage } from "../service/aws";
 import { sendAuthEmail, sendWelcomeEmail } from "../service/mail";
+import axios from "axios";
 
 export const userRegisterController = async (req: Request, res: Response) => {
   try {
@@ -331,5 +333,56 @@ export const getUserInfo = async (req: Request, res: Response) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: error });
+  }
+};
+
+export const userGoogleController = async (req: Request, res: Response) => {
+  try {
+    const salt = bcrypt.genSaltSync();
+    // @ts-ignore
+    const prisma = req.prisma as PrismaClient;
+    const { token } = req.body;
+    const userInfoUrl = `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${token}`;
+    const response = await axios.get(userInfoUrl);
+    if (!response.data || !response.data.verified_email)
+      return res.status(400).json({ error: "Invalid Token" });
+    const exist = await getUserByGoogleID(response.data.id, prisma);
+    let user;
+    console.log(response.data);
+    if (!exist ) {  
+    user = await createUser(
+        {
+          email: response.data.email,
+          firstname:response.data.given_name,
+          lastname:response.data.family_name,
+          googleID: response.data.id,
+          userol: "CLIENT",
+          validated:response.data.verified_email
+        },
+        prisma
+      );
+      res.status(200).json({
+        email: user.email,
+        userid: user.id,
+        googleId: user.id,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        userol: user.userol,
+        token: createJWT(user),
+      });
+    } else if (exist && exist.email == response.data.email) {
+      res.status(200).json({
+        email: exist.email,
+        userid: exist.id,
+        googleId: exist.id,
+        firstname: exist.firstname,
+        lastname: exist.lastname,
+        userol: exist.userol,
+        token: createJWT(user),
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error });
   }
 };

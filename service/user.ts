@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, UserRol } from "@prisma/client";
 
 export const getUserById = async (id: number, prisma: PrismaClient) => {
   return await prisma.user.findUnique({
@@ -13,6 +13,11 @@ export const getAllUsers = async (prisma: PrismaClient) => {
 export const getUserByEmail = async (email: string, prisma: PrismaClient) => {
   return await prisma.user.findUnique({
     where: { email },
+  });
+};
+export const getUserByGoogleID = async (googleID: string, prisma: PrismaClient) => {
+  return await prisma.user.findUnique({
+    where: { googleID:googleID },
   });
 };
 
@@ -75,5 +80,14 @@ export const createUserProfile = async (
     data: {
       ...data,
     },
+  });
+};
+
+export const createUser = async (
+  data: { email: string; password?: string, firstname:string,googleID?:string, lastname:string,userol:UserRol,validated?:boolean},
+  prisma: PrismaClient
+) => {
+  return await prisma.user.create({
+   data:{...data}
   });
 };
