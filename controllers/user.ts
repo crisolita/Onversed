@@ -374,11 +374,11 @@ export const userGoogleController = async (req: Request, res: Response) => {
       res.status(200).json({
         email: exist.email,
         userid: exist.id,
-        googleId: exist.id,
+        googleId: exist.googleID,
         firstname: exist.firstname,
         lastname: exist.lastname,
         userol: exist.userol,
-        token: createJWT(user),
+        token: createJWT(exist),
       });
     }
   } catch (error) {
