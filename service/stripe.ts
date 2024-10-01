@@ -24,9 +24,11 @@ export const createCheckoutSession = async (
       ],
       ///ARREGLAR AQUI LOS URLS
       success_url: `https://${
-        process.env.ENV == "TEST" ? `xperiendv3-dev.netlify.app` : `xperiend.io`
+        process.env.ENV == "TEST" ? `onversed.netlify.app` : `onversed.com`
       }/stripe/success/${orderId}`,
-      cancel_url: `https://xperiend.com/stripe/cancel/${orderId}`,
+      cancel_url: `https://${
+        process.env.ENV == "PROD" ? `onversed.netlify.app` : `onversed.com`
+      }/stripe/cancel/${orderId}`,
     });
     return session;
   } catch (e) {
